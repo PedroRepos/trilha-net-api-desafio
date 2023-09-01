@@ -21,14 +21,26 @@ namespace TrilhaApiDesafio.Controllers
             // TODO: Buscar o Id no banco utilizando o EF
             // TODO: Validar o tipo de retorno. Se não encontrar a tarefa, retornar NotFound,
             // caso contrário retornar OK com a tarefa encontrada
-            return Ok();
+
+            var buscaId = _context.Tarefas.Find(id);
+
+            if(buscaId == null)
+                return NotFound();
+
+            return Ok(buscaId);
         }
 
         [HttpGet("ObterTodos")]
         public IActionResult ObterTodos()
         {
             // TODO: Buscar todas as tarefas no banco utilizando o EF
-            return Ok();
+
+            var buscaId = _context.Tarefas.ToList();
+
+            if(buscaId == null)
+                return BadRequest();
+
+            return Ok(buscaId);
         }
 
         [HttpGet("ObterPorTitulo")]
@@ -36,9 +48,15 @@ namespace TrilhaApiDesafio.Controllers
         {
             // TODO: Buscar  as tarefas no banco utilizando o EF, que contenha o titulo recebido por parâmetro
             // Dica: Usar como exemplo o endpoint ObterPorData
-            return Ok();
-        }
 
+            var buscaTitulo = _context.Tarefas.Where(x => x.Titulo == titulo);
+
+            if(buscaTitulo == null)
+                return NotFound();
+
+            return Ok(buscaTitulo);
+
+        }
         [HttpGet("ObterPorData")]
         public IActionResult ObterPorData(DateTime data)
         {
@@ -51,6 +69,7 @@ namespace TrilhaApiDesafio.Controllers
         {
             // TODO: Buscar  as tarefas no banco utilizando o EF, que contenha o status recebido por parâmetro
             // Dica: Usar como exemplo o endpoint ObterPorData
+            
             var tarefa = _context.Tarefas.Where(x => x.Status == status);
             return Ok(tarefa);
         }
@@ -62,7 +81,11 @@ namespace TrilhaApiDesafio.Controllers
                 return BadRequest(new { Erro = "A data da tarefa não pode ser vazia" });
 
             // TODO: Adicionar a tarefa recebida no EF e salvar as mudanças (save changes)
-            return CreatedAtAction(nameof(ObterPorId), new { id = tarefa.Id }, tarefa);
+
+            _context.Tarefas.Add(tarefa);
+            _context.SaveChanges();
+
+            return Ok();
         }
 
         [HttpPut("{id}")]
@@ -78,6 +101,15 @@ namespace TrilhaApiDesafio.Controllers
 
             // TODO: Atualizar as informações da variável tarefaBanco com a tarefa recebida via parâmetro
             // TODO: Atualizar a variável tarefaBanco no EF e salvar as mudanças (save changes)
+
+            tarefaBanco.Data = tarefa.Data;
+            tarefaBanco.Descricao = tarefa.Descricao;
+            tarefaBanco.Status = tarefa.Status;
+            tarefaBanco.Titulo = tarefa.Titulo;
+
+            _context.Update(tarefaBanco);
+            _context.SaveChanges();
+
             return Ok();
         }
 
@@ -90,6 +122,10 @@ namespace TrilhaApiDesafio.Controllers
                 return NotFound();
 
             // TODO: Remover a tarefa encontrada através do EF e salvar as mudanças (save changes)
+
+            _context.Remove(tarefaBanco);
+            _context.SaveChanges(); 
+
             return NoContent();
         }
     }
